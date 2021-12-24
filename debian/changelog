@@ -1,0 +1,5 @@
+fuse3 (100:3.10.5+20220123b08e275-1) UNRELEASED; urgency=medium
+
+  * https://github.com/libfuse/libfuse/commit/b08e275083d0316fa4d735d457869d62ce4114de
+
+ -- Wong Hoi Sing Edison <hswong3i@gmail.com>  Sun, 30 Jan 2022 13:56:56 +0800
