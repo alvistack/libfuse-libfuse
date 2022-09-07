@@ -1,0 +1,5 @@
+libfuse3-dev: breakout-link
+libfuse3-dev: changelog-file-not-compressed
+libfuse3-dev: copyright-without-copyright-notice
+libfuse3-dev: initial-upload-closes-no-bugs
+libfuse3-dev: zero-byte-file-in-doc-directory
