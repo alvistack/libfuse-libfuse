@@ -1,0 +1,6 @@
+fuse3: changelog-file-not-compressed
+fuse3: copyright-without-copyright-notice
+fuse3: initial-upload-closes-no-bugs
+fuse3: no-manual-page
+fuse3: uncompressed-manual-page
+fuse3: zero-byte-file-in-doc-directory

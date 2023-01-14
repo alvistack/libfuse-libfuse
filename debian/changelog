@@ -1,0 +1,5 @@
+fuse3 (100:3.13.0-1) UNRELEASED; urgency=medium
+
+  * https://github.com/libfuse/libfuse/releases/tag/fuse-3.13.0
+
+ -- Wong Hoi Sing Edison <hswong3i@pantarei-design.com>  Sat, 14 Jan 2023 22:45:50 +0800
