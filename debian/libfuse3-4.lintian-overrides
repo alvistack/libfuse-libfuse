@@ -1,0 +1,4 @@
+libfuse3-4: changelog-file-not-compressed
+libfuse3-4: copyright-without-copyright-notice
+libfuse3-4: initial-upload-closes-no-bugs
+libfuse3-4: zero-byte-file-in-doc-directory

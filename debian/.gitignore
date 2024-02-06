@@ -1,0 +1,11 @@
+*.substvars
+*debhelper*
+.debhelper
+autoreconf.*
+files
+fuse3
+fuse3-udeb
+libfuse3-4
+libfuse3-4-udeb
+libfuse3-dev
+tmp
