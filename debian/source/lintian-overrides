@@ -1,0 +1,5 @@
+fuse3 source: file-without-copyright-information
+fuse3 source: no-debian-changes
+fuse3 source: not-binnmuable-any-depends-any
+fuse3 source: orig-tarball-missing-upstream-signature
+fuse3 source: weak-library-dev-dependency
