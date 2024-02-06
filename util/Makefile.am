@@ -10,6 +10,8 @@ noinst_PROGRAMS = mount.fuse
 # copying it over.
 fusermount_SOURCES = fusermount.c mount_util.c
 fusermount_CPPFLAGS = -I$(top_srcdir)/lib
+fusermount_CFLAGS =  -fPIE $(AM_CFLAGS)
+fusermount_LDFLAGS = -pie $(AM_LDFLAGS)
 BUILT_SOURCES = mount_util.c
 mount_util.c: $(top_srcdir)/lib/mount_util.c
 	@cp $(top_srcdir)/lib/mount_util.c .
@@ -41,7 +43,7 @@ install-exec-local:
 	$(INSTALL_SCRIPT) $(srcdir)/init_script $(DESTDIR)$(INIT_D_PATH)/fuse
 	@if test -x /usr/sbin/update-rc.d; then \
 		echo "/usr/sbin/update-rc.d fuse start 34 S . start 41 0 6 . || true"; \
-		/usr/sbin/update-rc.d fuse start 34 S . start 41 0 6 . || true; \
+		#/usr/sbin/update-rc.d fuse start 34 S . start 41 0 6 . || true; \
 	fi
 
 install-data-local:

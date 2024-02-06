@@ -1,0 +1,4 @@
+fuse: command-with-path-in-maintainer-script
+fuse: copyright-without-copyright-notice
+fuse: initial-upload-closes-no-bugs
+fuse: zero-byte-file-in-doc-directory

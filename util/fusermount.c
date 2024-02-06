@@ -1033,6 +1033,7 @@ static int check_perm(const char **mntp, struct stat *stbuf, int *mountpoint_fd)
 		0x9123683E /* BTRFS_SUPER_MAGIC */,
 		0x00C36400 /* CEPH_SUPER_MAGIC */,
 		0xFF534D42 /* CIFS_MAGIC_NUMBER */,
+		0X00004D44 /* MSDOS_SUPER_MAGIC */,
 		0x0000F15F /* ECRYPTFS_SUPER_MAGIC */,
 		0x0000EF53 /* EXT[234]_SUPER_MAGIC */,
 		0xF2F52010 /* F2FS_SUPER_MAGIC */,
@@ -1046,11 +1047,14 @@ static int check_perm(const char **mntp, struct stat *stbuf, int *mountpoint_fd)
 		0x5346544E /* NTFS_SB_MAGIC */,
 		0x794C7630 /* OVERLAYFS_SUPER_MAGIC */,
 		0x52654973 /* REISERFS_SUPER_MAGIC */,
+		0xFE534D42 /* SMB2_SUPER_MAGIC */,
 		0x73717368 /* SQUASHFS_MAGIC */,
 		0x01021994 /* TMPFS_MAGIC */,
 		0x24051905 /* UBIFS_SUPER_MAGIC */,
+		0x736675005346544e /* UFSD */,
 		0x58465342 /* XFS_SB_MAGIC */,
 		0x2FC12FC1 /* ZFS_SUPER_MAGIC */,
+		0x00000187 /* AUTOFS */,
 	};
 	for (i = 0; i < sizeof(f_type_whitelist)/sizeof(f_type_whitelist[0]); i++) {
 		if (f_type_whitelist[i] == fs_buf.f_type)

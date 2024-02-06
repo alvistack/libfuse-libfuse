@@ -1211,7 +1211,7 @@ static void do_open(fuse_req_t req, fuse_ino_t nodeid, const void *inarg)
 	fi.flags = arg->flags;
 
 	if (req->f->op.open)
-		req->f->op.open(req, nodeid, &fi);
+		(req->f->op.open)(req, nodeid, &fi);
 	else
 		fuse_reply_open(req, &fi);
 }
