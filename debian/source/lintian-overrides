@@ -1,0 +1,4 @@
+fuse source: file-without-copyright-information
+fuse source: no-debian-changes
+fuse source: not-binnmuable-any-depends-any
+fuse source: weak-library-dev-dependency

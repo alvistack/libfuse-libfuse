@@ -22,6 +22,10 @@
 #include <sys/socket.h>
 #include <sys/wait.h>
 
+#ifdef HAVE_CONFIG_H
+	#include "config.h"
+#endif
+
 struct message {
 	unsigned intr : 1;
 	unsigned nofd : 1;
@@ -124,7 +128,8 @@ static int receive_message(int sock, void *buf, size_t buflen, int *fdp,
 	return res;
 }
 
-static int closefrom(int minfd)
+#if !defined(HAVE_CLOSEFROM)
+static int fuse_closefrom(int minfd)
 {
 	DIR *dir = opendir("/proc/self/fd");
 	if (dir) {
@@ -141,6 +146,7 @@ static int closefrom(int minfd)
 	}
 	return 0;
 }
+#endif
 
 static void send_reply(int cfd, struct message *msg)
 {
@@ -384,7 +390,7 @@ int main(int argc, char *argv[])
 		dup2(nullfd, 1);
 	}
 	close(3);
-	closefrom(5);
+	fuse_closefrom(5);
 	while (1) {
 		char c;
 		int sock;

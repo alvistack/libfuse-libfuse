@@ -219,41 +219,76 @@ struct fuse_context_i {
 	fuse_req_t req;
 };
 
+/* Defined by FUSE_REGISTER_MODULE() in lib/modules/subdir.c and iconv.c.  */
+extern struct fuse_module fuse_fusemod_subdir_module;
+extern struct fuse_module fuse_fusemod_iconv_module;
+
 static pthread_key_t fuse_context_key;
 static pthread_mutex_t fuse_context_lock = PTHREAD_MUTEX_INITIALIZER;
 static int fuse_context_ref;
 static struct fusemod_so *fuse_current_so;
-static struct fuse_module *fuse_modules;
+static struct fuse_module *fuse_modules = NULL;
 
-static int fuse_load_so_name(const char *soname)
+static int fuse_load_so_name(const char *soname, const char *module_name)
 {
 	struct fusemod_so *so;
+        int ret = 0;
 
 	so = calloc(1, sizeof(struct fusemod_so));
 	if (!so) {
 		fprintf(stderr, "fuse: memory allocation failed\n");
-		return -1;
+                ret = -1;
+                goto end;
 	}
 
 	fuse_current_so = so;
-	so->handle = dlopen(soname, RTLD_NOW);
+
+	so->handle = dlopen (soname, RTLD_NOW);
+        if (so->handle == NULL) {
+                fprintf (stderr, "fuse: dlopen() failed: %s\n", dlerror ());
+                ret = -1;
+                goto freeso_end;
+        }
+
+        const size_t module_len = strlen (module_name);
+        char *symbol = malloc (64 + module_len);
+        if (symbol == NULL) {
+                perror ("fuse");
+                ret = -1;
+                goto dlopen_end;
+        }
+
+        sprintf (symbol, "fuse_fusemod_%s_module", module_name);
+
+        struct fuse_module *module;
+        module = dlsym (so->handle, symbol);
+        if (module != NULL) {
+                fuse_register_module (module);
+        }
+
 	fuse_current_so = NULL;
-	if (!so->handle) {
-		fprintf(stderr, "fuse: %s\n", dlerror());
-		goto err;
-	}
+
 	if (!so->ctr) {
 		fprintf(stderr, "fuse: %s did not register any modules\n",
 			soname);
-		goto err;
+                ret = -1;
+		goto freesym_end;
 	}
-	return 0;
 
-err:
-	if (so->handle)
-		dlclose(so->handle);
-	free(so);
-	return -1;
+freesym_end:
+        free (symbol);
+dlopen_end:
+        if (ret != 0) {
+                /* dlclose() only on error, otherwise we won't have
+                 * access to the .so anymore.  */
+                if (dlclose (so->handle)) {
+                        fprintf (stderr, "fuse: dlclose() failed: %s\n", dlerror ());
+                }
+        }
+freeso_end:
+	free (so);
+end:
+	return ret;
 }
 
 static int fuse_load_so_module(const char *module)
@@ -265,14 +300,14 @@ static int fuse_load_so_module(const char *module)
 		return -1;
 	}
 	sprintf(soname, "libfusemod_%s.so", module);
-	res = fuse_load_so_name(soname);
+	res = fuse_load_so_name(soname, module);
 	free(soname);
 	return res;
 }
 
 static struct fuse_module *fuse_find_module(const char *module)
 {
-	struct fuse_module *m;
+        struct fuse_module *m;
 	for (m = fuse_modules; m; m = m->next) {
 		if (strcmp(module, m->name) == 0) {
 			m->ctr++;
@@ -1529,17 +1564,15 @@ static int fuse_compat_open(struct fuse_fs *fs, const char *path,
 {
 	int err;
 	if (!fs->compat || fs->compat >= 25)
-		err = fs->op.open(path, fi);
+		err = (fs->op.open)(path, fi);
 	else if (fs->compat == 22) {
 		struct fuse_file_info_compat tmp;
 		memcpy(&tmp, fi, sizeof(tmp));
-		err = ((struct fuse_operations_compat22 *) &fs->op)->open(path,
-									  &tmp);
+		err = (((struct fuse_operations_compat22 *) &fs->op)->open)(path, &tmp);
 		memcpy(fi, &tmp, sizeof(tmp));
 		fi->fh = tmp.fh;
 	} else
-		err = ((struct fuse_operations_compat2 *) &fs->op)
-			->open(path, fi->flags);
+		err = (((struct fuse_operations_compat2 *) &fs->op)->open)(path, fi->flags);
 	return err;
 }
 
@@ -4350,7 +4383,7 @@ static int fuse_session_loop_remember(struct fuse *f)
 
 		res = poll(&fds, 1, timeout * 1000);
 		if (res == -1) {
-			if (errno == -EINTR)
+			if (errno == EINTR)
 				continue;
 			else
 				break;
@@ -4671,6 +4704,15 @@ struct fuse *fuse_new_common(struct fuse_chan *ch, struct fuse_args *args,
 	struct node *root;
 	struct fuse_fs *fs;
 	struct fuse_lowlevel_ops llop = fuse_path_ops;
+
+        /* Boolean: have the builtin modules already been registered?  */
+        static int builtin_modules_registered_p = 0;
+        if (builtin_modules_registered_p == 0) {
+                /* If not, register them. */
+                fuse_register_module (&fuse_fusemod_subdir_module);
+                fuse_register_module (&fuse_fusemod_iconv_module);
+                builtin_modules_registered_p = 1;
+        }
 
 	if (fuse_create_context_key() == -1)
 		goto out;
